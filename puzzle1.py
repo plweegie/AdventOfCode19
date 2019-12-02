@@ -4,7 +4,7 @@ def main():
     with open("puzzle1.txt", "r") as file:
         for index, line in enumerate(file):
             fuel_module = get_fuel_for_module(int(line))
-            fuel = fuel + fuel_module
+            fuel += fuel_module
 
             print("Module {}: {}".format(index, fuel_module))
             print("Fuel: {}".format(fuel))
@@ -21,7 +21,7 @@ def get_fuel_for_module(mass):
     fuel_init = get_fuel_for_mass(mass)
 
     while fuel_init > 0:
-        fuel_total = fuel_total + fuel_init
+        fuel_total += fuel_init
         fuel_init = get_fuel_for_mass(fuel_init)
 
     return fuel_total
