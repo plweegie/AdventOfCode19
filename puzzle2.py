@@ -1,3 +1,7 @@
+# Original puzzle:
+# https://adventofcode.com/2019/day/2
+
+
 class OpComputer(object):
 
     OPCODE_ADD = 1
@@ -46,9 +50,9 @@ class OpComputer(object):
         pointer = self.pointer
         while True:
             opcode = next(self.opcode())
-            if (opcode == OpComputer.OPCODE_ADD):
+            if opcode == OpComputer.OPCODE_ADD:
                 self.operation_add(pointer+1, pointer+2, pointer+3)
-            elif (opcode == OpComputer.OPCODE_MULTIPLY):
+            elif opcode == OpComputer.OPCODE_MULTIPLY:
                 self.operation_multiply(pointer+1, pointer+2, pointer+3)
             else:
                 print(self.tape)

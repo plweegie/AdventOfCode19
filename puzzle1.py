@@ -1,3 +1,7 @@
+# Original puzzle:
+# https://adventofcode.com/2019/day/1
+
+
 def main():
     fuel = 0
 
