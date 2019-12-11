@@ -8,8 +8,12 @@ class OpComputer(object):
     OPCODE_MULTIPLY = 2
     OPCODE_INPUT = 3
     OPCODE_OUTPUT = 4
+    OPCODE_JUMP_IF_TRUE = 5
+    OPCODE_JUMP_IF_FALSE = 6
+    OPCODE_LESS_THAN = 7
+    OPCODE_EQUALS = 8
     OPCODE_HALT = 99
-
+    
     MODE_POSITION = 11
     MODE_IMMEDIATE = 12
 
@@ -63,27 +67,22 @@ class OpComputer(object):
         self.pointer += step
     
 
-    def get_operation_inputs(self, pos_input_1, pos_input_2, pos_output, modes):
-        if modes[0] == self.MODE_POSITION:
-            input_1 = self.tape[self.tape[pos_input_1]]
-        else:
-            input_1 = self.tape[pos_input_1]
-
-        if modes[1] == self.MODE_POSITION:
-            input_2 = self.tape[self.tape[pos_input_2]]
-        else:
-            input_2 = self.tape[pos_input_2]
+    def get_operation_inputs(self, pos_input_1, pos_input_2,  modes):
+        input_1 = self.tape[self.tape[pos_input_1]] if modes[0] == self.MODE_POSITION \
+            else self.tape[pos_input_1]
+        input_2 = self.tape[self.tape[pos_input_2]] if modes[1] == self.MODE_POSITION \
+            else self.tape[pos_input_2]
 
         return (input_1, input_2)
 
 
     def operation_add(self, pos_input_1, pos_input_2, pos_output, modes):
-        inputs = self.get_operation_inputs(pos_input_1, pos_input_2, pos_output, modes)
+        inputs = self.get_operation_inputs(pos_input_1, pos_input_2, modes)
         self.overwrite_tape(self.tape[pos_output], inputs[0] + inputs[1])
 
     
     def operation_multiply(self, pos_input_1, pos_input_2, pos_output, modes):
-        inputs = self.get_operation_inputs(pos_input_1, pos_input_2, pos_output, modes)
+        inputs = self.get_operation_inputs(pos_input_1, pos_input_2, modes)
         self.overwrite_tape(self.tape[pos_output], inputs[0] * inputs[1])
 
 
@@ -93,12 +92,40 @@ class OpComputer(object):
 
 
     def operation_output(self, pos, modes):
-        if modes[0] == self.MODE_POSITION:
-            print(self.tape[self.tape[pos]])
-        else:
-            print(self.tape[pos])
+        output = self.tape[self.tape[pos]] if modes[0] == self.MODE_POSITION else self.tape[pos]
+        print(output)
         self.pointer += 2
 
+
+    def operation_jump_if_true(self, pos_input_1, pos_input_2, modes):
+        inputs = self.get_operation_inputs(pos_input_1, pos_input_2, modes)
+        if inputs[0] == 0:
+            self.pointer += 3
+        else:
+            self.pointer = inputs[1]
+
+        
+    def operation_jump_if_false(self, pos_input_1, pos_input_2, modes):
+        inputs = self.get_operation_inputs(pos_input_1, pos_input_2, modes)
+        if inputs[0] == 0:
+            self.pointer = inputs[1]
+        else:
+            self.pointer += 3
+
+
+    def operation_less_than(self, pos_input_1, pos_input_2, pos_output, modes):
+        inputs = self.get_operation_inputs(pos_input_1, pos_input_2, modes)
+        output = 1 if inputs[0] < inputs[1] else 0
+        
+        self.overwrite_tape(self.tape[pos_output], output)
+
+
+    def operation_equals(self, pos_input_1, pos_input_2, pos_output, modes):
+        inputs = self.get_operation_inputs(pos_input_1, pos_input_2, modes)
+        output = 1 if inputs[0] == inputs[1] else 0
+
+        self.overwrite_tape(self.tape[pos_output], output)
+            
 
     def run(self):
         pointer = self.pointer
@@ -113,6 +140,15 @@ class OpComputer(object):
                 self.operation_input(pointer+1)
             elif opcode[0] == OpComputer.OPCODE_OUTPUT:
                 self.operation_output(pointer+1, opcode[1])
+            elif opcode[0] == OpComputer.OPCODE_JUMP_IF_TRUE:
+                self.operation_jump_if_true(pointer+1, pointer+2, opcode[1])
+            elif opcode[0] == OpComputer.OPCODE_JUMP_IF_FALSE:
+                self.operation_jump_if_false(pointer+1, pointer+2, opcode[1])
+            elif opcode[0] == OpComputer.OPCODE_LESS_THAN:
+                self.operation_less_than(pointer+1, pointer+2, pointer+3, opcode[1])
+            elif opcode[0] == OpComputer.OPCODE_EQUALS:
+                self.operation_equals(pointer+1, pointer+2, pointer+3, opcode[1])
+
             else:
                 print(self.tape)
                 return
